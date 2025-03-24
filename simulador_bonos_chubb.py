@@ -39,9 +39,11 @@ def calcular_bono_crecimiento(pct_crec, unidades):
 
 if tipo == "Autos":
     input_prod_2024 = st.text_input("Producción 2024 ($)", value="", placeholder="Ej. $1,000,000")
+    input_prod_2024 = format_currency(parse_currency(input_prod_2024))
     prod_2024 = parse_currency(input_prod_2024)
 
     input_prod_2025 = st.text_input("Producción 2025 ($)", value="", placeholder="Ej. $2,000,000")
+    input_prod_2025 = format_currency(parse_currency(input_prod_2025))
     prod_2025 = parse_currency(input_prod_2025)
 
     siniestralidad = st.number_input("Siniestralidad (%)", min_value=0.0, max_value=100.0, step=0.1)
@@ -49,6 +51,15 @@ if tipo == "Autos":
 
     if st.button("Calcular Bonos Autos"):
         comentarios = []
+        notas = []
+
+        # Mostrar datos ingresados
+        st.markdown("### Datos Ingresados")
+        st.markdown(f"- Agente: **{agente.upper()}**")
+        st.markdown(f"- Producción 2024: **{format_currency(prod_2024)}**")
+        st.markdown(f"- Producción 2025: **{format_currency(prod_2025)}**")
+        st.markdown(f"- Siniestralidad: **{siniestralidad:.2f}%**")
+        st.markdown(f"- Unidades Emitidas: **{unidades}**")
 
         # Bono Producción
         if siniestralidad < 60:
@@ -71,7 +82,7 @@ if tipo == "Autos":
                 pct_prod = 0.02
             else:
                 pct_prod = 0.03
-            comentarios.append("⚠ Siniestralidad ≥60%, se aplica tabla de producción ajustada.")
+            notas.append("⚠ Siniestralidad ≥60%, se aplica tabla de producción ajustada.")
 
         bono_prod = prod_2025 * pct_prod
         comentarios.append(f"Bono Producción ({pct_prod*100:.0f}%): {format_currency(bono_prod)} {'✔' if bono_prod>0 else '❌'}")
@@ -102,7 +113,7 @@ if tipo == "Autos":
             bono_crec_pct = calcular_bono_crecimiento(pct_crec, unidades)
             bono_crec = crec * bono_crec_pct
             comentarios.append(f"Bono Crecimiento ({bono_crec_pct*100:.0f}%): {format_currency(bono_crec)} {'✔' if bono_crec>0 else '❌'}")
-            comentarios.append(f"✔ Crecimiento real del {pct_crec:.1f}% con {unidades} unidades emitidas.")
+            notas.append(f"✔ Crecimiento real del {pct_crec:.1f}% con {unidades} unidades emitidas. Se asigna bono según tabla.")
 
         total = bono_prod + bono_sini + bono_crec
 
@@ -112,50 +123,8 @@ if tipo == "Autos":
             st.markdown(f"- {c}")
         st.markdown(f"**➡ Total Bono: {format_currency(total)}**")
 
-elif tipo == "Daños":
-    input_prod_danos = st.text_input("Producción 2025 Daños ($)", value="", placeholder="Ej. $2,000,000")
-    prod_danos = parse_currency(input_prod_danos)
-
-    sinies_danos = st.number_input("Siniestralidad Daños (%)", min_value=0.0, max_value=100.0, step=0.1)
-
-    if st.button("Calcular Bonos Daños"):
-        comentarios = []
-
-        # Bono Producción Daños
-        if prod_danos <= 300000:
-            pct_prod = 0.01
-        elif prod_danos <= 500000:
-            pct_prod = 0.02
-        elif prod_danos <= 1000000:
-            pct_prod = 0.03
-        elif prod_danos <= 2000000:
-            pct_prod = 0.04
-        else:
-            pct_prod = 0.05
-
-        bono_prod = prod_danos * pct_prod
-        comentarios.append(f"Bono Producción ({pct_prod*100:.0f}%): {format_currency(bono_prod)} {'✔' if bono_prod>0 else '❌'}")
-
-        # Bono Siniestralidad Daños
-        if sinies_danos <= 30:
-            pct_sini = 0.04
-        elif sinies_danos <= 45:
-            pct_sini = 0.03
-        elif sinies_danos <= 50:
-            pct_sini = 0.02
-        elif sinies_danos <= 55:
-            pct_sini = 0.01
-        else:
-            pct_sini = 0
-
-        bono_sini = prod_danos * pct_sini
-        motivo_sini = "✔ Aplica por siniestralidad aceptable." if pct_sini > 0 else "❌ No aplica por siniestralidad >55%."
-        comentarios.append(f"Bono Siniestralidad ({pct_sini*100:.0f}%): {format_currency(bono_sini)} {'✔' if bono_sini>0 else '❌'} - {motivo_sini}")
-
-        total = bono_prod + bono_sini
-
-        st.markdown("---")
-        st.markdown(f"### Resultado para {agente.upper()}")
-        for c in comentarios:
-            st.markdown(f"- {c}")
-        st.markdown(f"**➡ Total Bono: {format_currency(total)}**")
+        if notas:
+            st.markdown("---")
+            st.markdown("### Notas")
+            for n in notas:
+                st.markdown(f"- {n}")
