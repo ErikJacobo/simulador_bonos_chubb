@@ -3,44 +3,36 @@ import re
 
 st.set_page_config(page_title="Simulador de Bonos CHUBB 2025", layout="centered")
 
-st.title("Simulador de Bonos")
-st.subheader("CHUBB 2025")
+st.markdown("<h1 style='text-align: center;'>Simulador de Bonos</h1>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: center;'>CHUBB 2025</h2>", unsafe_allow_html=True)
 
 # Entradas generales
-agente = st.text_input("Nombre del agente")
+agente = st.text_input("Nombre del Agente")
 tipo = st.selectbox("Tipo de Bono", ["Autos", "Daños"])
 
 # Funciones auxiliares
 def format_currency(value):
     try:
-        return "$" + f"{int(round(value)):,}"
+        return "$" + format(round(value), ",.2f")
     except:
-        return "$0"
+        return "$0.00"
 
 def parse_currency(value):
     try:
-        if "." in str(value) and "," not in str(value):
-            st.warning("⚠ Usa comas (,) para separar miles. No uses puntos (.) ya que se interpretan como decimales.")
-        value = str(value).replace(",", "")
-        value = re.sub(r'[^\d.]', '', value)
-        if "." in value:
-            entero, decimal = value.split(".", 1)
-            if decimal and int(decimal[0]) >= 5:
-                return int(entero) + 1
-            else:
-                return int(entero)
+        value = str(value).replace(".", "").replace(",", "")
+        value = re.sub(r'[^0-9]', '', value)
         return int(value)
     except:
         return 0
 
 if tipo == "Autos":
-    input_prod_2024 = st.text_input("Producción 2024 ($)", value="", placeholder="Ej. $1,000,000")
+    input_prod_2024 = st.text_input("Producción 2024 ($)", value="", placeholder="Ej. $1,000,000.00")
     prod_2024 = parse_currency(input_prod_2024)
 
-    input_prod_2025 = st.text_input("Producción 2025 ($)", value="", placeholder="Ej. $2,000,000")
+    input_prod_2025 = st.text_input("Producción 2025 ($)", value="", placeholder="Ej. $2,000,000.00")
     prod_2025 = parse_currency(input_prod_2025)
 
-    siniestralidad = st.number_input("Siniestralidad (%)", min_value=0.0, max_value=100.0, step=0.1)
+    siniestralidad = st.number_input("Siniestralidad (%)", min_value=0.0, max_value=100.0, step=0.01)
     unidades = st.number_input("Número de Unidades Emitidas", min_value=0)
 
     def calcular_bono_crecimiento(pct_crec, unidades):
@@ -61,8 +53,7 @@ if tipo == "Autos":
         comentarios = []
         notas = []
 
-        st.markdown("### Datos Ingresados")
-        st.markdown(f"- Agente: **{agente.upper()}**")
+        st.markdown("### 📊 Datos Ingresados:")
         st.markdown(f"- Producción 2024: **{format_currency(prod_2024)}**")
         st.markdown(f"- Producción 2025: **{format_currency(prod_2025)}**")
         st.markdown(f"- Siniestralidad: **{siniestralidad:.2f}%**")
@@ -91,7 +82,7 @@ if tipo == "Autos":
             notas.append("⚠ Siniestralidad ≥60%, se aplica tabla de producción ajustada.")
 
         bono_prod = prod_2025 * pct_prod
-        comentarios.append(f"Bono Producción ({pct_prod*100:.0f}%): {format_currency(bono_prod)} {'✔' if bono_prod>0 else '❌'}")
+        comentarios.append(f"Bono Producción ({pct_prod*100:.2f}%): {format_currency(bono_prod)}")
 
         if siniestralidad <= 30:
             pct_sini = 0.04
@@ -106,7 +97,7 @@ if tipo == "Autos":
 
         bono_sini = prod_2025 * pct_sini
         motivo_sini = "✔ Aplica por siniestralidad aceptable." if pct_sini > 0 else "❌ No aplica por siniestralidad >55%."
-        comentarios.append(f"Bono Siniestralidad ({pct_sini*100:.0f}%): {format_currency(bono_sini)} {'✔' if bono_sini>0 else '❌'} - {motivo_sini}")
+        comentarios.append(f"Bono Siniestralidad ({pct_sini*100:.2f}%): {format_currency(bono_sini)} - {motivo_sini}")
 
         if prod_2024 == 0:
             bono_crec = prod_2025 * 0.04
@@ -116,34 +107,33 @@ if tipo == "Autos":
             pct_crec = (crec / prod_2024) * 100
             bono_crec_pct = calcular_bono_crecimiento(pct_crec, unidades)
             bono_crec = crec * bono_crec_pct
-            comentarios.append(f"Bono Crecimiento ({bono_crec_pct*100:.0f}%): {format_currency(bono_crec)} {'✔' if bono_crec>0 else '❌'}")
-            notas.append(f"✔ Crecimiento real del {pct_crec:.1f}% con {int(unidades)} unidades emitidas. Se asigna bono según tabla.")
+            comentarios.append(f"Bono Crecimiento ({bono_crec_pct*100:.2f}%): {format_currency(bono_crec)}")
+            notas.append(f"✔ Crecimiento real del {pct_crec:.2f}% con {int(unidades)} unidades emitidas. Se asigna bono según tabla.")
 
         total = bono_prod + bono_sini + bono_crec
 
         st.markdown("---")
-        st.markdown(f"### Resultado para {agente.upper()}")
+        st.markdown(f"### 📄 Resultado para {agente.upper()}")
         for c in comentarios:
             st.markdown(f"- {c}")
-        st.markdown(f"**➡ Total Bono: {format_currency(total)}**")
+        st.markdown(f"📌 **Total del Bono: {format_currency(total)}**")
 
         if notas:
             st.markdown("---")
-            st.markdown("### Notas")
+            st.markdown("### 📝 Notas Aclaratorias")
             for n in notas:
                 st.markdown(f"- {n}")
 
 elif tipo == "Daños":
-    input_prod_danios = st.text_input("Producción Daños PYME 2025 ($)", value="", placeholder="Ej. $500,000")
+    input_prod_danios = st.text_input("Producción Daños PYME 2025 ($)", value="", placeholder="Ej. $500,000.00")
     prod_danios = parse_currency(input_prod_danios)
 
-    siniestralidad_danios = st.number_input("Siniestralidad Daños (%)", min_value=0.0, max_value=100.0, step=0.1)
+    siniestralidad_danios = st.number_input("Siniestralidad Daños (%)", min_value=0.0, max_value=100.0, step=0.01)
 
     if st.button("Calcular Bonos Daños"):
         comentarios = []
 
-        st.markdown("### Datos Ingresados")
-        st.markdown(f"- Agente: **{agente.upper()}**")
+        st.markdown("### 📊 Datos Ingresados:")
         st.markdown(f"- Producción Daños: **{format_currency(prod_danios)}**")
         st.markdown(f"- Siniestralidad Daños: **{siniestralidad_danios:.2f}%**")
 
@@ -170,13 +160,13 @@ elif tipo == "Daños":
 
         bono_sini_danios = prod_danios * pct_sini_danios
 
-        comentarios.append(f"Bono Producción Daños ({pct_danios*100:.0f}%): {format_currency(bono_danios)}")
-        comentarios.append(f"Bono Siniestralidad Daños ({pct_sini_danios*100:.0f}%): {format_currency(bono_sini_danios)}")
+        comentarios.append(f"Bono Producción Daños ({pct_danios*100:.2f}%): {format_currency(bono_danios)}")
+        comentarios.append(f"Bono Siniestralidad Daños ({pct_sini_danios*100:.2f}%): {format_currency(bono_sini_danios)}")
 
         total_danios = bono_danios + bono_sini_danios
 
         st.markdown("---")
-        st.markdown(f"### Resultado para {agente.upper()}")
+        st.markdown(f"### 📄 Resultado para {agente.upper()}")
         for c in comentarios:
             st.markdown(f"- {c}")
-        st.markdown(f"**➡ Total Bono: {format_currency(total_danios)}**")
+        st.markdown(f"📌 **Total del Bono: {format_currency(total_danios)}**")
