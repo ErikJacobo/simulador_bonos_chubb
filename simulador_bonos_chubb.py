@@ -19,7 +19,11 @@ def format_currency(value):
 
 def parse_currency(value):
     try:
-        return int(re.sub(r'[^\d]', '', str(value)))
+        if "." in str(value) and "," not in str(value):
+            st.warning("⚠ Usa comas (,) para separar miles. No uses puntos (.) ya que se interpretan como decimales.")
+        value = str(value).replace(",", "")
+        value = re.sub(r'[^\d]', '', value)
+        return int(value)
     except:
         return 0
 
@@ -124,57 +128,49 @@ if tipo == "Autos":
                 st.markdown(f"- {n}")
 
 elif tipo == "Daños":
-    input_prod_danos = st.text_input("Producción 2025 Daños PYME ($)", value="", placeholder="Ej. $2,000,000")
-    prod_danos = parse_currency(input_prod_danos)
+    input_prod_danios = st.text_input("Producción Daños PYME 2025 ($)", value="", placeholder="Ej. $500,000")
+    prod_danios = parse_currency(input_prod_danios)
 
-    sinies_danos = st.number_input("Siniestralidad Daños (%)", min_value=0.0, max_value=100.0, step=0.1)
+    siniestralidad_danios = st.number_input("Siniestralidad Daños (%)", min_value=0.0, max_value=100.0, step=0.1)
 
     if st.button("Calcular Bonos Daños"):
         comentarios = []
-        notas = []
 
         st.markdown("### Datos Ingresados")
         st.markdown(f"- Agente: **{agente.upper()}**")
-        st.markdown(f"- Producción 2025 Daños: **{format_currency(prod_danos)}**")
-        st.markdown(f"- Siniestralidad Daños: **{sinies_danos:.2f}%**")
+        st.markdown(f"- Producción Daños: **{format_currency(prod_danios)}**")
+        st.markdown(f"- Siniestralidad Daños: **{siniestralidad_danios:.2f}%**")
 
-        if sinies_danos < 60:
-            if prod_danos <= 350000:
-                pct_prod = 0.01
-            elif prod_danos <= 500000:
-                pct_prod = 0.02
+        if siniestralidad_danios < 60:
+            if prod_danios <= 350000:
+                pct_danios = 0.01
+            elif prod_danios <= 500000:
+                pct_danios = 0.02
             else:
-                pct_prod = 0.03
+                pct_danios = 0.03
         else:
-            pct_prod = 0.01
-            notas.append("⚠ Siniestralidad ≥60%, se aplica bono fijo del 1% en Daños.")
+            pct_danios = 0.01
 
-        bono_prod = prod_danos * pct_prod
-        comentarios.append(f"Bono Producción Daños ({pct_prod*100:.0f}%): {format_currency(bono_prod)}")
+        bono_danios = prod_danios * pct_danios
 
-        if sinies_danos <= 30:
-            pct_sini = 0.03
-        elif sinies_danos <= 45:
-            pct_sini = 0.02
-        elif sinies_danos <= 55:
-            pct_sini = 0.01
+        if siniestralidad_danios <= 30:
+            pct_sini_danios = 0.03
+        elif siniestralidad_danios <= 45:
+            pct_sini_danios = 0.02
+        elif siniestralidad_danios <= 55:
+            pct_sini_danios = 0.01
         else:
-            pct_sini = 0
+            pct_sini_danios = 0
 
-        bono_sini = prod_danos * pct_sini
-        motivo_sini = "✔ Aplica por siniestralidad aceptable." if pct_sini > 0 else "❌ No aplica por siniestralidad >55%."
-        comentarios.append(f"Bono Siniestralidad ({pct_sini*100:.0f}%): {format_currency(bono_sini)} - {motivo_sini}")
+        bono_sini_danios = prod_danios * pct_sini_danios
 
-        total = bono_prod + bono_sini
+        comentarios.append(f"Bono Producción Daños ({pct_danios*100:.0f}%): {format_currency(bono_danios)}")
+        comentarios.append(f"Bono Siniestralidad Daños ({pct_sini_danios*100:.0f}%): {format_currency(bono_sini_danios)}")
+
+        total_danios = bono_danios + bono_sini_danios
 
         st.markdown("---")
         st.markdown(f"### Resultado para {agente.upper()}")
         for c in comentarios:
             st.markdown(f"- {c}")
-        st.markdown(f"**➡ Total Bono: {format_currency(total)}**")
-
-        if notas:
-            st.markdown("---")
-            st.markdown("### Notas")
-            for n in notas:
-                st.markdown(f"- {n}")
+        st.markdown(f"**➡ Total Bono: {format_currency(total_danios)}**")
