@@ -13,7 +13,7 @@ tipo = st.selectbox("Tipo de Bono", ["Autos", "Daños"])
 # Funciones auxiliares
 def format_currency(value):
     try:
-        return "$" + f"{int(value):,}"
+        return "$" + f"{int(round(value)):,}"
     except:
         return "$0"
 
@@ -22,7 +22,13 @@ def parse_currency(value):
         if "." in str(value) and "," not in str(value):
             st.warning("⚠ Usa comas (,) para separar miles. No uses puntos (.) ya que se interpretan como decimales.")
         value = str(value).replace(",", "")
-        value = re.sub(r'[^\d]', '', value)
+        value = re.sub(r'[^\d.]', '', value)
+        if "." in value:
+            entero, decimal = value.split(".", 1)
+            if decimal and int(decimal[0]) >= 5:
+                return int(entero) + 1
+            else:
+                return int(entero)
         return int(value)
     except:
         return 0
@@ -60,7 +66,7 @@ if tipo == "Autos":
         st.markdown(f"- Producción 2024: **{format_currency(prod_2024)}**")
         st.markdown(f"- Producción 2025: **{format_currency(prod_2025)}**")
         st.markdown(f"- Siniestralidad: **{siniestralidad:.2f}%**")
-        st.markdown(f"- Unidades Emitidas: **{unidades}**")
+        st.markdown(f"- Unidades Emitidas: **{int(unidades)}**")
 
         if siniestralidad < 60:
             if prod_2025 <= 350000:
@@ -111,7 +117,7 @@ if tipo == "Autos":
             bono_crec_pct = calcular_bono_crecimiento(pct_crec, unidades)
             bono_crec = crec * bono_crec_pct
             comentarios.append(f"Bono Crecimiento ({bono_crec_pct*100:.0f}%): {format_currency(bono_crec)} {'✔' if bono_crec>0 else '❌'}")
-            notas.append(f"✔ Crecimiento real del {pct_crec:.1f}% con {unidades} unidades emitidas. Se asigna bono según tabla.")
+            notas.append(f"✔ Crecimiento real del {pct_crec:.1f}% con {int(unidades)} unidades emitidas. Se asigna bono según tabla.")
 
         total = bono_prod + bono_sini + bono_crec
 
