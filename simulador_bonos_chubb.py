@@ -41,13 +41,11 @@ def calcular_bono_crecimiento(pct_crec, unidades):
         return 0.17 if unidades > 150 else 0.15 if unidades > 50 else 0.12
 
 if tipo == "Autos":
-    input_prod_2024 = st.text_input("Producción 2024 ($)", value="")
+    input_prod_2024 = st.text_input("Producción 2024 ($)", value="", placeholder="Ej. $1,000,000")
     prod_2024 = parse_currency(input_prod_2024)
-    st.write(f"Producción 2024 formateada: {format_currency(prod_2024)}")
 
-    input_prod_2025 = st.text_input("Producción 2025 ($)", value="")
+    input_prod_2025 = st.text_input("Producción 2025 ($)", value="", placeholder="Ej. $2,000,000")
     prod_2025 = parse_currency(input_prod_2025)
-    st.write(f"Producción 2025 formateada: {format_currency(prod_2025)}")
 
     siniestralidad = st.number_input("Siniestralidad (%)", min_value=0.0, max_value=100.0, step=0.1)
     unidades = st.number_input("Número de Unidades Emitidas", min_value=0)
@@ -112,15 +110,14 @@ if tipo == "Autos":
         total = bono_prod + bono_sini + bono_crec
 
         st.markdown("---")
-        st.markdown(f"### Resultado para {agente}")
+        st.markdown(f"### Resultado para {agente.upper()}")
         for c in comentarios:
             st.write(c)
         st.markdown(f"**➡ Total Bono: {format_currency(total)}**")
 
 elif tipo == "Daños":
-    input_prod_danos = st.text_input("Producción 2025 Daños ($)", value="")
+    input_prod_danos = st.text_input("Producción 2025 Daños ($)", value="", placeholder="Ej. $2,000,000")
     prod_danos = parse_currency(input_prod_danos)
-    st.write(f"Producción Daños formateada: {format_currency(prod_danos)}")
 
     sinies_danos = st.number_input("Siniestralidad Daños (%)", min_value=0.0, max_value=100.0, step=0.1)
 
@@ -161,7 +158,7 @@ elif tipo == "Daños":
         total = bono_prod + bono_sini
 
         st.markdown("---")
-        st.markdown(f"### Resultado para {agente}")
+        st.markdown(f"### Resultado para {agente.upper()}")
         for c in comentarios:
             st.write(c)
         st.markdown(f"**➡ Total Bono: {format_currency(total)}**")
