@@ -2,7 +2,8 @@ import streamlit as st
 import locale
 import re
 
-locale.setlocale(locale.LC_ALL, '')
+# Configura la localización para formateo con comas
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 st.set_page_config(page_title="Simulador de Bonos CHUBB 2025", layout="centered")
 
@@ -112,7 +113,7 @@ if tipo == "Autos":
         st.markdown("---")
         st.markdown(f"### Resultado para {agente.upper()}")
         for c in comentarios:
-            st.write(c)
+            st.markdown(f"- {c}")
         st.markdown(f"**➡ Total Bono: {format_currency(total)}**")
 
 elif tipo == "Daños":
@@ -160,5 +161,5 @@ elif tipo == "Daños":
         st.markdown("---")
         st.markdown(f"### Resultado para {agente.upper()}")
         for c in comentarios:
-            st.write(c)
+            st.markdown(f"- {c}")
         st.markdown(f"**➡ Total Bono: {format_currency(total)}**")
