@@ -1,9 +1,5 @@
 import streamlit as st
-import locale
 import re
-
-# Configura la localización para formateo con comas
-locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 st.set_page_config(page_title="Simulador de Bonos CHUBB 2025", layout="centered")
 
@@ -17,7 +13,7 @@ tipo = st.selectbox("Tipo de Bono", ["Autos", "Daños"])
 # Funciones auxiliares
 def format_currency(value):
     try:
-        return "$" + locale.format_string("%d", int(value), grouping=True)
+        return "$" + f"{int(value):,}"
     except:
         return "$0"
 
