@@ -6,11 +6,11 @@ st.set_page_config(page_title="Simulador de Bonos CHUBB 2025", layout="centered"
 st.markdown("<h1 style='text-align: center;'>Simulador de Bonos</h1>", unsafe_allow_html=True)
 st.markdown("<h2 style='text-align: center;'>CHUBB 2025</h2>", unsafe_allow_html=True)
 
-# Entradas generales
+st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
+
 agente = st.text_input("Nombre del Agente")
 tipo = st.selectbox("Tipo de Bono", ["Autos", "Daños"])
 
-# Funciones auxiliares
 def format_currency(value):
     try:
         return "$" + format(round(value), ",.2f")
@@ -19,9 +19,11 @@ def format_currency(value):
 
 def parse_currency(value):
     try:
-        value = str(value).replace(".", "").replace(",", "")
-        value = re.sub(r'[^0-9]', '', value)
-        return int(value)
+        clean = re.sub(r'[^0-9.]', '', value)
+        if clean.count('.') > 1:
+            clean = clean.replace('.', '', clean.count('.') - 1)
+        parsed = float(clean)
+        return round(parsed)
     except:
         return 0
 
@@ -54,6 +56,7 @@ if tipo == "Autos":
         notas = []
 
         st.markdown("### 📊 Datos Ingresados:")
+        st.markdown(f"- Agente: **{agente.upper()}**")
         st.markdown(f"- Producción 2024: **{format_currency(prod_2024)}**")
         st.markdown(f"- Producción 2025: **{format_currency(prod_2025)}**")
         st.markdown(f"- Siniestralidad: **{siniestralidad:.2f}%**")
@@ -124,6 +127,8 @@ if tipo == "Autos":
             for n in notas:
                 st.markdown(f"- {n}")
 
+        st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
+
 elif tipo == "Daños":
     input_prod_danios = st.text_input("Producción Daños PYME 2025 ($)", value="", placeholder="Ej. $500,000.00")
     prod_danios = parse_currency(input_prod_danios)
@@ -134,6 +139,7 @@ elif tipo == "Daños":
         comentarios = []
 
         st.markdown("### 📊 Datos Ingresados:")
+        st.markdown(f"- Agente: **{agente.upper()}**")
         st.markdown(f"- Producción Daños: **{format_currency(prod_danios)}**")
         st.markdown(f"- Siniestralidad Daños: **{siniestralidad_danios:.2f}%**")
 
@@ -170,3 +176,5 @@ elif tipo == "Daños":
         for c in comentarios:
             st.markdown(f"- {c}")
         st.markdown(f"📌 **Total del Bono: {format_currency(total_danios)}**")
+
+        st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
