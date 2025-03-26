@@ -18,6 +18,9 @@ elif tipo_bono == "Daños":
     prod_2025_danios = st.text_input("Producción 2025 Daños ($)", placeholder="Ej. $1,000,000.00")
     siniestralidad_danios = st.text_input("Siniestralidad Daños (%)", placeholder="Ej. 40")
 
+# Mostrar leyenda antes de calcular
+st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
+
 resultado = ""
 
 if st.button("Calcular Bonos"):
@@ -66,7 +69,7 @@ if st.button("Calcular Bonos"):
                     pct_prod = 0.03
                     nota_prod = "Producción alta y siniestralidad alta, aplica bono del 3%."
             bono_prod = p2025 * pct_prod
-            resultado += f"**Bono Producción ({pct_prod*100:.0f}%):** ${bono_prod:,.2f} ✔\n{nota_prod}\n"
+            resultado += f"**Bono Producción ({pct_prod*100:.0f}%):** ${bono_prod:,.2f} {'✔' if bono_prod > 0 else '❌'}\n{nota_prod}\n"
 
             # Bono Siniestralidad
             if sin <= 30:
@@ -147,3 +150,4 @@ if st.button("Calcular Bonos"):
     st.markdown("### Resultado")
     st.text_area("", resultado, height=350)
     st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
+
