@@ -2,8 +2,9 @@ import streamlit as st
 
 st.set_page_config(page_title="Simulador de Bonos CHUBB 2025", layout="centered")
 
-st.title("Simulador de Bonos")
-st.subheader("CHUBB 2025")
+# Títulos centrados
+st.markdown("<h1 style='text-align: center;'>Simulador de Bonos</h1>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: center;'>CHUBB 2025</h2>", unsafe_allow_html=True)
 
 nombre = st.text_input("Nombre del Agente")
 tipo_bono = st.selectbox("Tipo de Bono", ["Autos", "Daños"])
@@ -38,31 +39,50 @@ if st.button("Calcular Bonos"):
             if sin < 60:
                 if p2025 <= 350000:
                     pct_prod = 0.01
+                    nota_prod = "En el rango de 250,000 a 350,000 aplica bono del 1%."
                 elif p2025 <= 500000:
                     pct_prod = 0.02
+                    nota_prod = "En el rango de 350,001 a 500,000 aplica bono del 2%."
                 elif p2025 <= 1000000:
                     pct_prod = 0.03
+                    nota_prod = "En el rango de 500,001 a 1,000,000 aplica bono del 3%."
                 elif p2025 <= 2000000:
                     pct_prod = 0.04
+                    nota_prod = "En el rango de 1,000,001 a 2,000,000 aplica bono del 4%."
                 else:
                     pct_prod = 0.05
+                    nota_prod = "Más de 2,000,000 aplica bono del 5%."
             else:
                 if p2025 <= 500000:
                     pct_prod = 0.01
+                    nota_prod = "Producción baja y siniestralidad alta, aplica bono del 1%."
                 elif p2025 <= 1000000:
                     pct_prod = 0.01
+                    nota_prod = "Producción intermedia con siniestralidad alta, aplica bono del 1%."
                 elif p2025 <= 2000000:
                     pct_prod = 0.02
+                    nota_prod = "Producción mayor con siniestralidad alta, aplica bono del 2%."
                 else:
                     pct_prod = 0.03
+                    nota_prod = "Producción alta y siniestralidad alta, aplica bono del 3%."
             bono_prod = p2025 * pct_prod
-            resultado += f"**Bono Producción ({pct_prod*100:.0f}%):** ${bono_prod:,.2f} {'✔' if bono_prod > 0 else '❌'}\n"
+            resultado += f"**Bono Producción ({pct_prod*100:.0f}%):** ${bono_prod:,.2f} ✔\n{nota_prod}\n"
 
             # Bono Siniestralidad
-            pct_sini = 0.04 if sin <= 30 else 0.03 if sin <= 45 else 0.02 if sin <= 50 else 0.01 if sin <= 55 else 0
+            if sin <= 30:
+                pct_sini = 0.04
+            elif sin <= 45:
+                pct_sini = 0.03
+            elif sin <= 50:
+                pct_sini = 0.02
+            elif sin <= 55:
+                pct_sini = 0.01
+            else:
+                pct_sini = 0
+
             bono_sini = p2025 * pct_sini
-            motivo_sini = "✔ Aplica por siniestralidad aceptable." if pct_sini > 0 else "❌ No aplica por siniestralidad >55%."
-            resultado += f"**Bono Siniestralidad ({pct_sini*100:.0f}%):** ${bono_sini:,.2f} {'✔' if bono_sini > 0 else '❌'} - {motivo_sini}\n"
+            motivo_sini = f"{'✔' if pct_sini > 0 else '❌'} Aplica por siniestralidad del {sin:.1f}%."
+            resultado += f"**Bono Siniestralidad ({pct_sini*100:.0f}%):** ${bono_sini:,.2f} - {motivo_sini}\n"
 
             # Bono Crecimiento
             if p2024 == 0:
@@ -105,13 +125,15 @@ if st.button("Calcular Bonos"):
                 resultado += "❌ Producción insuficiente para aplicar bonos.\n"
                 total = 0
             else:
-                pct_danios = 0
                 if sin_danios <= 30:
                     pct_danios = 0.03 if p_danios > 500000 else 0.02 if p_danios > 350000 else 0.01
                 elif sin_danios <= 45:
                     pct_danios = 0.02 if p_danios > 350000 else 0.01
                 elif sin_danios <= 55:
                     pct_danios = 0.01
+                else:
+                    pct_danios = 0
+
                 bono_danios = p_danios * pct_danios
                 resultado += f"**Bono Producción Daños ({pct_danios*100:.0f}%):** ${bono_danios:,.2f} {'✔' if bono_danios > 0 else '❌'}\n"
                 total = bono_danios
@@ -123,6 +145,5 @@ if st.button("Calcular Bonos"):
 
     st.markdown("---")
     st.markdown("### Resultado")
-    st.text_area("", resultado, height=300)
-    st.markdown("---")
-    st.info("Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.")
+    st.text_area("", resultado, height=350)
+    st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
