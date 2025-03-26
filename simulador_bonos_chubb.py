@@ -232,6 +232,7 @@ elif tipo_ramo == "Vida":
         except Exception as e:
             resultado = f"<p style='color:red;'>❌ Error: {e}</p>"
 
+
 elif tipo_ramo == "Hogar":
     st.markdown("### 🏠 Datos para Hogar")
     prod_2024 = st.text_input("Producción 2024 Hogar ($)", placeholder="Ej. $100,000")
