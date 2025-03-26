@@ -158,7 +158,7 @@ if resultado:
 else:
     st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
 
-elif tipo_ramo == "Vida":
+if tipo_ramo == "Vida":
     st.markdown("### ❤️ Datos para Vida")
     prod_2024 = st.text_input("Producción 2024 Vida ($)", placeholder="Ej. $200,000")
     prod_2025 = st.text_input("Producción 2025 Vida ($)", placeholder="Ej. $400,000")
