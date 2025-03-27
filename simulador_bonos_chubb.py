@@ -173,7 +173,7 @@ elif tipo_ramo == "Vida":
 
             if sa < 250000:
                 bono_vida = 0
-                resultado += f"<li>Bono de Vida: <strong>$0.00</strong> ❌ No aplica por no alcanzar el mínimo de $250,000 en suma asegurada.</li>"
+                resultado += "<li>Bono de Vida: <strong>$0.00</strong> ❌ No aplica por no alcanzar el mínimo de $250,000 en suma asegurada.</li>"
             elif sa <= 500000:
                 pct_vida = 0.01
             elif sa <= 1000000:
@@ -195,9 +195,6 @@ elif tipo_ramo == "Vida":
 
         except Exception as e:
             resultado = f"<p style='color:red;'>❌ Error: {e}</p>"
-
-        # Mostrar mensaje de restricciones debajo del botón después del cálculo
-        st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
 
 
 elif tipo_ramo == "Hogar":
