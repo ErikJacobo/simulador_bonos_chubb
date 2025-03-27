@@ -198,52 +198,12 @@ elif tipo_ramo == "Daños PYME":
 
 
 elif tipo_ramo == "Vida":
-    st.markdown("#### Datos para Vida Grupo")
-    suma_asegurada = st.text_input("Suma Asegurada 2025 ($)", placeholder="Ej. $1,000,000")
+    st.markdown("#### Datos para Vida")
+    prod_2024 = st.text_input("Producción 2024 Vida ($)", placeholder="Ej. $500,000")
+    prod_2025 = st.text_input("Producción 2025 Vida ($)", placeholder="Ej. $1,200,000")
+    siniestralidad = st.text_input("Siniestralidad (%)", placeholder="Ej. 28")
 
     if st.button("Calcular Bonos Vida"):
-        try:
-            sa = int(suma_asegurada.replace("$", "").replace(",", ""))
-            resultado += f"<h3>📋 Resultado para {nombre.upper()}</h3>"
-            resultado += "<h4>📊 Datos Ingresados:</h4><ul>"
-            resultado += f"<li>Suma Asegurada 2025: <strong>${sa:,.2f}</strong></li></ul>"
-            resultado += "<h4>💵 Resultados de Bono:</h4><ul>"
-
-            if sa < 250000:
-                bono_vida = 0
-                resultado += "<li>💔 <strong>Bono de Vida:</strong> $0.00 ❌ No aplica. Mínimo requerido: $250,000 de suma asegurada.</li>"
-            else:
-                if sa <= 500000:
-                    pct_vida = 0.01
-                elif sa <= 1000000:
-                    pct_vida = 0.02
-                elif sa <= 2000000:
-                    pct_vida = 0.03
-                elif sa <= 3000000:
-                    pct_vida = 0.04
-                elif sa <= 5000000:
-                    pct_vida = 0.05
-                else:
-                    pct_vida = 0.06
-
-                bono_vida = sa * pct_vida
-                resultado += f"<li>❤️ <strong>Bono de Vida:</strong> {pct_vida*100:.2f}% ➜ <strong>${bono_vida:,.2f}</strong><br>✅ Aplica por superar mínimo de $250,000.</li>"
-
-            resultado += f"</ul><h4>🧾 <strong>Total del Bono Vida:</strong> ${bono_vida:,.2f}</h4>"
-
-        except Exception as e:
-            resultado = f"<p style='color:red;'>❌ Error: {e}</p>"
-
-        st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
-
-
-elif tipo_ramo == "Hogar":
-    st.markdown("#### Datos para Hogar")
-    prod_2024 = st.text_input("Producción 2024 Hogar ($)", placeholder="Ej. $100,000")
-    prod_2025 = st.text_input("Producción 2025 Hogar ($)", placeholder="Ej. $150,000")
-    siniestralidad = st.text_input("Siniestralidad (%)", placeholder="Ej. 25")
-
-    if st.button("Calcular Bonos Hogar"):
         try:
             p2024 = int(prod_2024.replace("$", "").replace(",", "")) if prod_2024 else 0
             p2025 = int(prod_2025.replace("$", "").replace(",", "")) if prod_2025 else 0
@@ -256,35 +216,115 @@ elif tipo_ramo == "Hogar":
             resultado += f"<li>Siniestralidad: <strong>{sin:.2f}%</strong></li></ul>"
             resultado += "<h4>💵 Resultados de Bono:</h4><ul>"
 
-            # Bono Producción
-            if sin > 60:
-                pct_prod = 0
-                resultado += "<li>💔 <strong>Bono de Producción Hogar:</strong> $0.00 ❌ No aplica por siniestralidad superior al 60%.</li>"
-            elif p2025 < 25000:
-                pct_prod = 0
-                resultado += "<li>💔 <strong>Bono de Producción Hogar:</strong> $0.00 ❌ No aplica por no alcanzar $25,000 de producción.</li>"
-            else:
-                if p2025 <= 50000:
+            # BONO PRODUCCIÓN VIDA
+            bono_prod = 0
+            if sin <= 60:
+                if 200000 <= p2025 <= 299999:
+                    pct_prod = 0.01
+                elif 300000 <= p2025 <= 649999:
                     pct_prod = 0.02
-                elif p2025 <= 100000:
-                    pct_prod = 0.03
-                elif p2025 <= 150000:
+                elif 650000 <= p2025 <= 899999:
                     pct_prod = 0.04
-                elif p2025 <= 200000:
-                    pct_prod = 0.05
-                elif p2025 <= 300000:
+                elif 900000 <= p2025 <= 1499999:
                     pct_prod = 0.06
+                elif p2025 >= 1500000:
+                    pct_prod = 0.08
                 else:
-                    pct_prod = 0.07
-                bono_prod = p2025 * pct_prod
-                resultado += f"<li>🏡 <strong>Bono de Producción Hogar:</strong> {pct_prod*100:.2f}% ➜ <strong>${bono_prod:,.2f}</strong></li>"
+                    pct_prod = 0
+                bono_prod = p2025 * pct_prod if pct_prod > 0 else 0
+                if pct_prod > 0:
+                    resultado += f"<li>🧬 <strong>Bono de Producción Vida:</strong> {pct_prod*100:.2f}% ➜ <strong>${bono_prod:,.2f}</strong></li>"
+                else:
+                    resultado += "<li>🧬 <strong>Bono de Producción Vida:</strong> ❌ No aplica por no alcanzar el mínimo de $200,000.</li>"
+            else:
+                resultado += "<li>🧬 <strong>Bono de Producción Vida:</strong> ❌ No aplica por superar el 60% de siniestralidad.</li>"
 
-            # Bono Siniestralidad
+            # BONO CRECIMIENTO VIDA
+            bono_crec = 0
+            if p2024 > 0:
+                crecimiento = p2025 - p2024
+                pct_crec = (crecimiento / p2024) * 100
+                if pct_crec < 5:
+                    pct_crec_aplica = 0
+                elif pct_crec <= 14.99:
+                    pct_crec_aplica = 0.04
+                elif pct_crec <= 29.99:
+                    pct_crec_aplica = 0.05
+                elif pct_crec <= 49.99:
+                    pct_crec_aplica = 0.06
+                else:
+                    pct_crec_aplica = 0.08
+                bono_crec = crecimiento * pct_crec_aplica if pct_crec_aplica > 0 else 0
+                if pct_crec_aplica > 0:
+                    resultado += f"<li>📈 <strong>Bono de Crecimiento Vida:</strong> {pct_crec_aplica*100:.2f}% ➜ <strong>${bono_crec:,.2f}</strong> (Crecimiento del {pct_crec:.2f}%)</li>"
+                else:
+                    resultado += f"<li>📈 <strong>Bono de Crecimiento Vida:</strong> ❌ No aplica (Crecimiento del {pct_crec:.2f}%)</li>"
+            else:
+                resultado += "<li>📈 <strong>Bono de Crecimiento Vida:</strong> ❌ No aplica por no tener producción en 2024.</li>"
+
+            # BONO SINIESTRALIDAD VIDA
             if sin <= 22.99:
-                pct_sini = 0.03
+                pct_sini = 0.04
             elif sin <= 34.99:
                 pct_sini = 0.02
-            elif sin <= 44.99:
+            else:
+                pct_sini = 0
+            bono_sini = p2025 * pct_sini
+            if pct_sini > 0:
+                resultado += f"<li>🩺 <strong>Bono de Siniestralidad Vida:</strong> {pct_sini*100:.2f}% ➜ <strong>${bono_sini:,.2f}</strong></li>"
+            else:
+                resultado += "<li>🩺 <strong>Bono de Siniestralidad Vida:</strong> ❌ No aplica por superar 34.99% de siniestralidad.</li>"
+
+            total = bono_prod + bono_crec + bono_sini
+            resultado += f"</ul><h4>🧾 Total del Bono Vida:</h4><p><strong>${total:,.2f}</strong></p>"
+
+        except Exception as e:
+            resultado = f"<p style='color:red;'>❌ Error: {e}</p>"
+
+
+elif tipo_ramo == "Hogar":
+    st.markdown("### Datos para Hogar")
+    prod_2024 = st.text_input("Producción 2024 Hogar ($)", placeholder="Ej. $100,000")
+    prod_2025 = st.text_input("Producción 2025 Hogar ($)", placeholder="Ej. $150,000")
+    siniestralidad = st.text_input("Siniestralidad (%)", placeholder="Ej. 25")
+
+    if st.button("Calcular Bonos Hogar"):
+        try:
+            p2024 = int(prod_2024.replace("$", "").replace(",", "")) if prod_2024 else 0
+            p2025 = int(prod_2025.replace("$", "").replace(",", "")) if prod_2025 else 0
+            sin = float(siniestralidad)
+            resultado += f"<h3>📋 Resultado para {nombre.upper()}</h3>"
+            resultado += "<h4>📊 Datos Ingresados:</h4><ul>"
+            resultado += f"<li>Producción 2024: <strong>${p2024:,.2f}</strong></li>"
+            resultado += f"<li>Producción 2025: <strong>${p2025:,.2f}</strong></li>"
+            resultado += f"<li>Siniestralidad: <strong>{sin:.2f}%</strong></li></ul>"
+            resultado += "<h4>💵 Resultados de Bono:</h4><ul>"
+
+            # BONO DE PRODUCCIÓN HOGAR (según tabla oficial)
+            if p2025 < 25000:
+                pct_prod = 0
+                resultado += "<li>🏠 <strong>Bono de Producción Hogar:</strong> ❌ No aplica por no alcanzar $25,000 de producción.</li>"
+            elif p2025 <= 50000:
+                pct_prod = 0.02
+            elif p2025 <= 150000:
+                pct_prod = 0.03
+            elif p2025 <= 350000:
+                pct_prod = 0.04
+            else:
+                pct_prod = 0.07
+
+            bono_prod = p2025 * pct_prod
+            if pct_prod > 0:
+                resultado += f"<li>🏠 <strong>Bono de Producción Hogar:</strong> {pct_prod*100:.2f}% ➜ <strong>${bono_prod:,.2f}</strong></li>"
+
+            # BONO DE SINIESTRALIDAD HOGAR (según tabla oficial)
+            if sin <= 15:
+                pct_sini = 0.04
+            elif sin <= 25:
+                pct_sini = 0.03
+            elif sin <= 35:
+                pct_sini = 0.02
+            elif sin <= 40:
                 pct_sini = 0.01
             else:
                 pct_sini = 0
@@ -293,40 +333,36 @@ elif tipo_ramo == "Hogar":
             if pct_sini > 0:
                 resultado += f"<li>🧯 <strong>Bono de Siniestralidad Hogar:</strong> {pct_sini*100:.2f}% ➜ <strong>${bono_sini:,.2f}</strong></li>"
             else:
-                resultado += "<li>💔 <strong>Bono de Siniestralidad Hogar:</strong> $0.00 ❌ No aplica por siniestralidad superior al 44.99%.</li>"
+                resultado += "<li>🧯 <strong>Bono de Siniestralidad Hogar:</strong> ❌ No aplica por superar 40% de siniestralidad.</li>"
 
-            # Bono Crecimiento
-            if p2024 == 0:
+            # BONO DE CRECIMIENTO HOGAR (requiere mínimo $50,000 en 2024)
+            if p2024 < 50000:
                 bono_crec = 0
-                resultado += "<li>💔 <strong>Bono de Crecimiento Hogar:</strong> $0.00 ❌ No aplica por no tener producción en 2024.</li>"
+                resultado += "<li>📈 <strong>Bono de Crecimiento Hogar:</strong> ❌ No aplica por no alcanzar $50,000 de producción en 2024.</li>"
             else:
-                crec = p2025 - p2024
-                pct_crec = (crec / p2024) * 100
-                if pct_crec < 10:
-                    pct_crec_v = 0
-                elif pct_crec <= 20:
-                    pct_crec_v = 0.01
-                elif pct_crec <= 30:
-                    pct_crec_v = 0.02
-                elif pct_crec <= 40:
-                    pct_crec_v = 0.03
-                elif pct_crec <= 50:
-                    pct_crec_v = 0.04
-                else:
-                    pct_crec_v = 0.05
-                bono_crec = crec * pct_crec_v
-                if pct_crec_v > 0:
-                    resultado += f"<li>📈 <strong>Bono de Crecimiento Hogar:</strong> {pct_crec_v*100:.2f}% ➜ <strong>${bono_crec:,.2f}</strong> (Crecimiento del {pct_crec:.2f}%)</li>"
-                else:
-                    resultado += f"<li>💔 <strong>Bono de Crecimiento Hogar:</strong> $0.00 ❌ No aplica por crecimiento menor al 10% (tuvo {pct_crec:.2f}%).</li>"
+                crecimiento = p2025 - p2024
+                pct_crec = (crecimiento / p2024) * 100
 
+                if pct_crec < 15:
+                    pct_crec_v = 0
+                    resultado += f"<li>📈 <strong>Bono de Crecimiento Hogar:</strong> ❌ No aplica (crecimiento de {pct_crec:.2f}%, mínimo requerido: 15%).</li>"
+                elif pct_crec <= 20:
+                    pct_crec_v = 0.03
+                elif pct_crec <= 30:
+                    pct_crec_v = 0.05
+                else:
+                    pct_crec_v = 0.07
+
+                if pct_crec >= 15:
+                    bono_crec = crecimiento * pct_crec_v
+                    resultado += f"<li>📈 <strong>Bono de Crecimiento Hogar:</strong> {pct_crec_v*100:.2f}% ➜ <strong>${bono_crec:,.2f}</strong> (Crecimiento del {pct_crec:.2f}%)</li>"
+
+            # TOTAL BONO HOGAR
             total = bono_prod + bono_sini + bono_crec
-            resultado += f"</ul><h4>🧾 <strong>Total del Bono Hogar:</strong> ${total:,.2f}</h4>"
+            resultado += f"</ul><h4>🧾 <strong>Total del Bono Hogar:</strong> <strong>${total:,.2f}</strong></h4>"
 
         except Exception as e:
             resultado = f"<p style='color:red;'>❌ Error: {e}</p>"
-
-        st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
 
 
 elif tipo_ramo == "Accidentes y Enfermedades":
