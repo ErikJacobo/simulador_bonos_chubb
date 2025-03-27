@@ -2,21 +2,39 @@ import streamlit as st
 
 st.set_page_config(page_title="Simulador de Bonos CHUBB 2025", layout="centered")
 
-# Diseño de cabecera con el logo de LINK a la derecha
-col1, col2 = st.columns([4, 1])  # Col1 para título, Col2 para logo
+# Aplicar estilo CSS personalizado para ajustar la posición del logo
+st.markdown("""
+    <style>
+        .logo-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .logo-container img {
+            margin-top: -10px; /* Ajusta este valor según lo necesites */
+        }
+    </style>
+""", unsafe_allow_html=True)
 
-with col1:
-    st.markdown("<h1 style='text-align: left;'>Simulador de Bonos</h1>", unsafe_allow_html=True)
-    st.markdown("<h2 style='text-align: left;'>CHUBB 2025</h2>", unsafe_allow_html=True)
+# Contenedor con el logo alineado a la derecha
+st.markdown("""
+    <div class="logo-container">
+        <div>
+            <h1>Simulador de Bonos</h1>
+            <h2>CHUBB 2025</h2>
+        </div>
+        <div>
+            <img src="link logo.jpg" width="100">
+        </div>
+    </div>
+""", unsafe_allow_html=True)
 
-with col2:
-    st.image("link logo.jpg", width=100)  # Tamaño profesional ajustable
-
-# Campo para nombre antes de seleccionar el ramo
+# Campo para nombre antes del ramo
 nombre = st.text_input("Nombre del Agente")
 tipo_ramo = st.selectbox("Selecciona el ramo a simular", ["Autos", "Daños PYME", "Vida", "Hogar", "Accidentes y Enfermedades", "Otros Daños"])
 
 resultado = ""
+
 
 
 if tipo_ramo == "Autos":
