@@ -150,14 +150,6 @@ elif tipo_ramo == "Daños PYME":
         except Exception as e:
             resultado = f"<p style='color:red;'>❌ Error: {e}</p>"
 
-# Mostrar resultados y restricciones
-if resultado:
-    st.markdown("---")
-    st.markdown(resultado, unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
-else:
-    st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
-
 
 elif tipo_ramo == "Vida":
     st.markdown("### 🧬 Datos para Vida Grupo")
@@ -374,3 +366,12 @@ elif tipo_ramo == "Otros Daños":
 
         except Exception as e:
             resultado = f"<p style='color:red;'>❌ Error: {e}</p>"
+
+# Mostrar resultados y restricciones
+if resultado:
+    st.markdown("---")
+    st.markdown(resultado, unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
+else:
+    st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
+
