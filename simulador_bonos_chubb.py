@@ -6,14 +6,16 @@ st.set_page_config(page_title="Simulador de Bonos CHUBB 2025", layout="centered"
 st.markdown("<h1 style='text-align: center;'>Simulador de Bonos</h1>", unsafe_allow_html=True)
 st.markdown("<h2 style='text-align: center;'>CHUBB 2025</h2>", unsafe_allow_html=True)
 
+# Nombre del agente antes que el tipo
+nombre = st.text_input("Nombre del Agente")
+
 # Lista desplegable para elegir ramo
 tipo_ramo = st.selectbox("Selecciona el ramo a simular", ["Autos", "Daños PYME", "Vida", "Hogar", "Accidentes y Enfermedades", "Otros Daños"])
 
-nombre = st.text_input("Nombre del Agente")
 resultado = ""
 
 if tipo_ramo == "Autos":
-    st.markdown("### 🛻 Datos para Autos")
+    st.markdown("#### Datos para Autos")
     prod_2024 = st.text_input("Producción 2024 ($)", placeholder="Ej. $1,000,000")
     prod_2025 = st.text_input("Producción 2025 ($)", placeholder="Ej. $2,000,000")
     siniestralidad = st.text_input("Siniestralidad (%)", placeholder="Ej. 45")
@@ -25,6 +27,7 @@ if tipo_ramo == "Autos":
             p2025 = int(prod_2025.replace("$", "").replace(",", ""))
             sin = float(siniestralidad)
             uds = int(unidades)
+
             resultado += f"<h3>📋 Resultado para {nombre.upper()}</h3>"
             resultado += "<h4>📊 Datos Ingresados:</h4><ul>"
             resultado += f"<li>Producción 2024: <strong>${p2024:,.2f}</strong></li>"
@@ -33,7 +36,7 @@ if tipo_ramo == "Autos":
             resultado += f"<li>Unidades Emitidas: <strong>{uds}</strong></li></ul>"
             resultado += "<h4>💵 Resultados de Bono:</h4><ul>"
 
-            # BONO PRODUCCIÓN AUTOS
+            # BONO PRODUCCIÓN
             if sin < 60:
                 if p2025 <= 350000:
                     pct_prod = 0.01
@@ -54,11 +57,10 @@ if tipo_ramo == "Autos":
                     pct_prod = 0.02
                 else:
                     pct_prod = 0.03
-
             bono_prod = p2025 * pct_prod
-            resultado += f"<li>Bono de Producción: <strong>{pct_prod*100:.2f}%</strong> ➜ <strong>${bono_prod:,.2f}</strong></li>"
+            resultado += f"<li>📈 <strong>Bono de Producción:</strong> {pct_prod*100:.2f}% ➜ <strong>${bono_prod:,.2f}</strong><br>✅ Aplica según tabla con siniestralidad del {sin:.2f}%.</li>"
 
-            # BONO SINIESTRALIDAD AUTOS
+            # BONO SINIESTRALIDAD
             if sin <= 30:
                 pct_sini = 0.04
             elif sin <= 45:
@@ -69,15 +71,16 @@ if tipo_ramo == "Autos":
                 pct_sini = 0.01
             else:
                 pct_sini = 0
-
             bono_sini = p2025 * pct_sini
-            resultado += f"<li>Bono de Siniestralidad: <strong>{pct_sini*100:.2f}%</strong> ➜ <strong>${bono_sini:,.2f}</strong></li>"
+            if pct_sini > 0:
+                resultado += f"<li>🛡️ <strong>Bono de Siniestralidad:</strong> {pct_sini*100:.2f}% ➜ <strong>${bono_sini:,.2f}</strong><br>✅ Aplica por siniestralidad del {sin:.2f}%.</li>"
+            else:
+                resultado += f"<li>🛡️ <strong>Bono de Siniestralidad:</strong> $0.00 ❌ No aplica. Siniestralidad de {sin:.2f}% supera el límite.</li>"
 
-            # BONO CRECIMIENTO AUTOS
+            # BONO CRECIMIENTO
             if p2024 == 0:
                 bono_crec = p2025 * 0.04
-                pct_crec_aplica = 0.04
-                resultado += f"<li>Bono de Crecimiento (Agente Nuevo): <strong>{pct_crec_aplica*100:.2f}%</strong> ➜ <strong>${bono_crec:,.2f}</strong></li>"
+                resultado += f"<li>🚀 <strong>Bono de Crecimiento:</strong> 4.00% ➜ <strong>${bono_crec:,.2f}</strong><br>✅ Aplica por agente nuevo (sin producción en 2024).</li>"
             else:
                 crecimiento = p2025 - p2024
                 pct_crec = (crecimiento / p2024) * 100
@@ -96,16 +99,27 @@ if tipo_ramo == "Autos":
                         return 0.12 if unidades <= 50 else 0.15 if unidades <= 150 else 0.17
                 pct_crec_aplica = calcular_bono_crecimiento(pct_crec, uds)
                 bono_crec = crecimiento * pct_crec_aplica
-                resultado += f"<li>Bono de Crecimiento: <strong>{pct_crec_aplica*100:.2f}%</strong> ➜ <strong>${bono_crec:,.2f}</strong> (Crecimiento del {pct_crec:.2f}%)</li>"
+                if pct_crec_aplica > 0:
+                    resultado += f"<li>🚀 <strong>Bono de Crecimiento:</strong> {pct_crec_aplica*100:.2f}% ➜ <strong>${bono_crec:,.2f}</strong><br>✅ Crecimiento del {pct_crec:.2f}% con {uds} unidades emitidas.</li>"
+                else:
+                    resultado += f"<li>🚀 <strong>Bono de Crecimiento:</strong> $0.00 ❌ No aplica por crecimiento insuficiente ({pct_crec:.2f}%).</li>"
 
             total = bono_prod + bono_sini + bono_crec
-            resultado += f"</ul><h4>🧾 Total del Bono Autos:</h4><p><strong>${total:,.2f}</strong></p>"
+            resultado += f"</ul><h4>🧾 <strong>Total del Bono Autos:</strong> ${total:,.2f}</h4>"
 
         except Exception as e:
             resultado = f"<p style='color:red;'>❌ Error: {e}</p>"
 
+        st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
+
+# Mostrar resultados
+if resultado:
+    st.markdown("---")
+    st.markdown(resultado, unsafe_allow_html=True)
+
+
 elif tipo_ramo == "Daños PYME":
-    st.markdown("### 🧱 Datos para Daños PYME")
+    st.markdown("#### Datos para Daños PYME")
     prod_danios = st.text_input("Producción 2025 Daños ($)", placeholder="Ej. $500,000")
     siniestralidad_d = st.text_input("Siniestralidad (%)", placeholder="Ej. 35")
 
@@ -113,13 +127,14 @@ elif tipo_ramo == "Daños PYME":
         try:
             p = int(prod_danios.replace("$", "").replace(",", ""))
             sin_d = float(siniestralidad_d)
+
             resultado += f"<h3>📋 Resultado para {nombre.upper()}</h3>"
             resultado += "<h4>📊 Datos Ingresados:</h4><ul>"
             resultado += f"<li>Producción Daños: <strong>${p:,.2f}</strong></li>"
             resultado += f"<li>Siniestralidad: <strong>{sin_d:.2f}%</strong></li></ul>"
             resultado += "<h4>💵 Resultados de Bono:</h4><ul>"
 
-            # Producción
+            # Bono Producción
             if sin_d < 60:
                 if p <= 350000:
                     pct_prod = 0.01
@@ -127,12 +142,13 @@ elif tipo_ramo == "Daños PYME":
                     pct_prod = 0.02
                 else:
                     pct_prod = 0.03
+                bono_prod = p * pct_prod
+                resultado += f"<li>📈 <strong>Bono de Producción:</strong> {pct_prod*100:.2f}% ➜ <strong>${bono_prod:,.2f}</strong><br>✅ Aplica por siniestralidad menor al 60%.</li>"
             else:
-                pct_prod = 0.01
-            bono_prod = p * pct_prod
-            resultado += f"<li>Bono de Producción Daños: <strong>{pct_prod*100:.2f}%</strong> ➜ <strong>${bono_prod:,.2f}</strong></li>"
+                bono_prod = p * 0.01
+                resultado += f"<li>📈 <strong>Bono de Producción:</strong> 1.00% ➜ <strong>${bono_prod:,.2f}</strong><br>⚠️ Aplica con porcentaje reducido por siniestralidad mayor al 60%.</li>"
 
-            # Siniestralidad
+            # Bono Siniestralidad
             if sin_d <= 30:
                 pct_sini = 0.03
             elif sin_d <= 45:
@@ -142,17 +158,23 @@ elif tipo_ramo == "Daños PYME":
             else:
                 pct_sini = 0
             bono_sini = p * pct_sini
-            resultado += f"<li>Bono de Siniestralidad Daños: <strong>{pct_sini*100:.2f}%</strong> ➜ <strong>${bono_sini:,.2f}</strong></li>"
+
+            if pct_sini > 0:
+                resultado += f"<li>🛡️ <strong>Bono de Siniestralidad:</strong> {pct_sini*100:.2f}% ➜ <strong>${bono_sini:,.2f}</strong><br>✅ Aplica por siniestralidad del {sin_d:.2f}%.</li>"
+            else:
+                resultado += f"<li>🛡️ <strong>Bono de Siniestralidad:</strong> $0.00 ❌ No aplica por siniestralidad mayor al 55%.</li>"
 
             total = bono_prod + bono_sini
-            resultado += f"</ul><h4>🧾 Total del Bono Daños:</h4><p><strong>${total:,.2f}</strong></p>"
+            resultado += f"</ul><h4>🧾 <strong>Total del Bono Daños PYME:</strong> ${total:,.2f}</h4>"
 
         except Exception as e:
             resultado = f"<p style='color:red;'>❌ Error: {e}</p>"
 
+        st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
+
 
 elif tipo_ramo == "Vida":
-    st.markdown("### 🧬 Datos para Vida Grupo")
+    st.markdown("#### Datos para Vida Grupo")
     suma_asegurada = st.text_input("Suma Asegurada 2025 ($)", placeholder="Ej. $1,000,000")
 
     if st.button("Calcular Bonos Vida"):
@@ -165,32 +187,34 @@ elif tipo_ramo == "Vida":
 
             if sa < 250000:
                 bono_vida = 0
-                resultado += "<li>Bono de Vida: <strong>$0.00</strong> ❌ No aplica por no alcanzar el mínimo de $250,000 en suma asegurada.</li>"
-            elif sa <= 500000:
-                pct_vida = 0.01
-            elif sa <= 1000000:
-                pct_vida = 0.02
-            elif sa <= 2000000:
-                pct_vida = 0.03
-            elif sa <= 3000000:
-                pct_vida = 0.04
-            elif sa <= 5000000:
-                pct_vida = 0.05
+                resultado += "<li>💔 <strong>Bono de Vida:</strong> $0.00 ❌ No aplica. Mínimo requerido: $250,000 de suma asegurada.</li>"
             else:
-                pct_vida = 0.06
+                if sa <= 500000:
+                    pct_vida = 0.01
+                elif sa <= 1000000:
+                    pct_vida = 0.02
+                elif sa <= 2000000:
+                    pct_vida = 0.03
+                elif sa <= 3000000:
+                    pct_vida = 0.04
+                elif sa <= 5000000:
+                    pct_vida = 0.05
+                else:
+                    pct_vida = 0.06
 
-            if sa >= 250000:
                 bono_vida = sa * pct_vida
-                resultado += f"<li>Bono de Vida: <strong>{pct_vida*100:.2f}%</strong> ➜ <strong>${bono_vida:,.2f}</strong></li>"
+                resultado += f"<li>❤️ <strong>Bono de Vida:</strong> {pct_vida*100:.2f}% ➜ <strong>${bono_vida:,.2f}</strong><br>✅ Aplica por superar mínimo de $250,000.</li>"
 
-            resultado += f"</ul><h4>🧾 Total del Bono Vida:</h4><p><strong>${bono_vida:,.2f}</strong></p>"
+            resultado += f"</ul><h4>🧾 <strong>Total del Bono Vida:</strong> ${bono_vida:,.2f}</h4>"
 
         except Exception as e:
             resultado = f"<p style='color:red;'>❌ Error: {e}</p>"
 
+        st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
+
 
 elif tipo_ramo == "Hogar":
-    st.markdown("### 🏠 Datos para Hogar")
+    st.markdown("#### Datos para Hogar")
     prod_2024 = st.text_input("Producción 2024 Hogar ($)", placeholder="Ej. $100,000")
     prod_2025 = st.text_input("Producción 2025 Hogar ($)", placeholder="Ej. $150,000")
     siniestralidad = st.text_input("Siniestralidad (%)", placeholder="Ej. 25")
@@ -200,6 +224,7 @@ elif tipo_ramo == "Hogar":
             p2024 = int(prod_2024.replace("$", "").replace(",", "")) if prod_2024 else 0
             p2025 = int(prod_2025.replace("$", "").replace(",", "")) if prod_2025 else 0
             sin = float(siniestralidad)
+
             resultado += f"<h3>📋 Resultado para {nombre.upper()}</h3>"
             resultado += "<h4>📊 Datos Ingresados:</h4><ul>"
             resultado += f"<li>Producción 2024: <strong>${p2024:,.2f}</strong></li>"
@@ -207,27 +232,30 @@ elif tipo_ramo == "Hogar":
             resultado += f"<li>Siniestralidad: <strong>{sin:.2f}%</strong></li></ul>"
             resultado += "<h4>💵 Resultados de Bono:</h4><ul>"
 
-            # Bono Producción Hogar
+            # Bono Producción
             if sin > 60:
                 pct_prod = 0
+                resultado += "<li>💔 <strong>Bono de Producción Hogar:</strong> $0.00 ❌ No aplica por siniestralidad superior al 60%.</li>"
             elif p2025 < 25000:
                 pct_prod = 0
-            elif p2025 <= 50000:
-                pct_prod = 0.02
-            elif p2025 <= 100000:
-                pct_prod = 0.03
-            elif p2025 <= 150000:
-                pct_prod = 0.04
-            elif p2025 <= 200000:
-                pct_prod = 0.05
-            elif p2025 <= 300000:
-                pct_prod = 0.06
+                resultado += "<li>💔 <strong>Bono de Producción Hogar:</strong> $0.00 ❌ No aplica por no alcanzar $25,000 de producción.</li>"
             else:
-                pct_prod = 0.07
-            bono_prod = p2025 * pct_prod
-            resultado += f"<li>Bono de Producción Hogar: <strong>{pct_prod*100:.2f}%</strong> ➜ <strong>${bono_prod:,.2f}</strong></li>"
+                if p2025 <= 50000:
+                    pct_prod = 0.02
+                elif p2025 <= 100000:
+                    pct_prod = 0.03
+                elif p2025 <= 150000:
+                    pct_prod = 0.04
+                elif p2025 <= 200000:
+                    pct_prod = 0.05
+                elif p2025 <= 300000:
+                    pct_prod = 0.06
+                else:
+                    pct_prod = 0.07
+                bono_prod = p2025 * pct_prod
+                resultado += f"<li>🏡 <strong>Bono de Producción Hogar:</strong> {pct_prod*100:.2f}% ➜ <strong>${bono_prod:,.2f}</strong></li>"
 
-            # Bono Siniestralidad Hogar
+            # Bono Siniestralidad
             if sin <= 22.99:
                 pct_sini = 0.03
             elif sin <= 34.99:
@@ -236,13 +264,17 @@ elif tipo_ramo == "Hogar":
                 pct_sini = 0.01
             else:
                 pct_sini = 0
-            bono_sini = p2025 * pct_sini
-            resultado += f"<li>Bono de Siniestralidad Hogar: <strong>{pct_sini*100:.2f}%</strong> ➜ <strong>${bono_sini:,.2f}</strong></li>"
 
-            # Bono Crecimiento Hogar
+            bono_sini = p2025 * pct_sini
+            if pct_sini > 0:
+                resultado += f"<li>🧯 <strong>Bono de Siniestralidad Hogar:</strong> {pct_sini*100:.2f}% ➜ <strong>${bono_sini:,.2f}</strong></li>"
+            else:
+                resultado += "<li>💔 <strong>Bono de Siniestralidad Hogar:</strong> $0.00 ❌ No aplica por siniestralidad superior al 44.99%.</li>"
+
+            # Bono Crecimiento
             if p2024 == 0:
                 bono_crec = 0
-                resultado += f"<li>Bono de Crecimiento Hogar: ❌ No aplica por no tener producción en 2024.</li>"
+                resultado += "<li>💔 <strong>Bono de Crecimiento Hogar:</strong> $0.00 ❌ No aplica por no tener producción en 2024.</li>"
             else:
                 crec = p2025 - p2024
                 pct_crec = (crec / p2024) * 100
@@ -259,16 +291,22 @@ elif tipo_ramo == "Hogar":
                 else:
                     pct_crec_v = 0.05
                 bono_crec = crec * pct_crec_v
-                resultado += f"<li>Bono de Crecimiento Hogar: <strong>{pct_crec_v*100:.2f}%</strong> ➜ <strong>${bono_crec:,.2f}</strong> (Crecimiento del {pct_crec:.2f}%)</li>"
+                if pct_crec_v > 0:
+                    resultado += f"<li>📈 <strong>Bono de Crecimiento Hogar:</strong> {pct_crec_v*100:.2f}% ➜ <strong>${bono_crec:,.2f}</strong> (Crecimiento del {pct_crec:.2f}%)</li>"
+                else:
+                    resultado += f"<li>💔 <strong>Bono de Crecimiento Hogar:</strong> $0.00 ❌ No aplica por crecimiento menor al 10% (tuvo {pct_crec:.2f}%).</li>"
 
             total = bono_prod + bono_sini + bono_crec
-            resultado += f"</ul><h4>🧾 Total del Bono Hogar:</h4><p><strong>${total:,.2f}</strong></p>"
+            resultado += f"</ul><h4>🧾 <strong>Total del Bono Hogar:</strong> ${total:,.2f}</h4>"
 
         except Exception as e:
             resultado = f"<p style='color:red;'>❌ Error: {e}</p>"
 
+        st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
+
+
 elif tipo_ramo == "Accidentes y Enfermedades":
-    st.markdown("### 🩺 Datos para Accidentes y Enfermedades (A&H)")
+    st.markdown("#### Datos para Accidentes y Enfermedades (A&H)")
     prod_2024 = st.text_input("Producción 2024 A&H ($)", placeholder="Ej. $300,000")
     prod_2025 = st.text_input("Producción 2025 A&H ($)", placeholder="Ej. $500,000")
     siniestralidad = st.text_input("Siniestralidad (%)", placeholder="Ej. 20")
@@ -289,20 +327,22 @@ elif tipo_ramo == "Accidentes y Enfermedades":
             # Bono Producción A&H
             if p2025 < 300000:
                 pct_prod = 0
-            elif p2025 <= 500000:
-                pct_prod = 0.02
-            elif p2025 <= 750000:
-                pct_prod = 0.03
-            elif p2025 <= 1000000:
-                pct_prod = 0.04
-            elif p2025 <= 1250000:
-                pct_prod = 0.05
-            elif p2025 <= 1500000:
-                pct_prod = 0.06
+                resultado += "<li>💔 <strong>Bono de Producción A&H:</strong> $0.00 ❌ No aplica por no alcanzar $300,000 de producción.</li>"
             else:
-                pct_prod = 0.07
-            bono_prod = p2025 * pct_prod
-            resultado += f"<li>Bono de Producción A&H: <strong>{pct_prod*100:.2f}%</strong> ➜ <strong>${bono_prod:,.2f}</strong></li>"
+                if p2025 <= 500000:
+                    pct_prod = 0.02
+                elif p2025 <= 750000:
+                    pct_prod = 0.03
+                elif p2025 <= 1000000:
+                    pct_prod = 0.04
+                elif p2025 <= 1250000:
+                    pct_prod = 0.05
+                elif p2025 <= 1500000:
+                    pct_prod = 0.06
+                else:
+                    pct_prod = 0.07
+                bono_prod = p2025 * pct_prod
+                resultado += f"<li>🏥 <strong>Bono de Producción A&H:</strong> {pct_prod*100:.2f}% ➜ <strong>${bono_prod:,.2f}</strong></li>"
 
             # Bono Siniestralidad A&H
             if sin <= 22.99:
@@ -311,13 +351,17 @@ elif tipo_ramo == "Accidentes y Enfermedades":
                 pct_sini = 0.025
             else:
                 pct_sini = 0
+
             bono_sini = p2025 * pct_sini
-            resultado += f"<li>Bono de Siniestralidad A&H: <strong>{pct_sini*100:.2f}%</strong> ➜ <strong>${bono_sini:,.2f}</strong></li>"
+            if pct_sini > 0:
+                resultado += f"<li>🧯 <strong>Bono de Siniestralidad A&H:</strong> {pct_sini*100:.2f}% ➜ <strong>${bono_sini:,.2f}</strong></li>"
+            else:
+                resultado += "<li>💔 <strong>Bono de Siniestralidad A&H:</strong> $0.00 ❌ No aplica por siniestralidad superior al 34.99%.</li>"
 
             # Bono Crecimiento A&H
             if p2024 == 0:
                 bono_crec = 0
-                resultado += f"<li>Bono de Crecimiento A&H: ❌ No aplica por no tener producción en 2024.</li>"
+                resultado += "<li>💔 <strong>Bono de Crecimiento A&H:</strong> $0.00 ❌ No aplica por no tener producción en 2024.</li>"
             else:
                 crec = p2025 - p2024
                 pct_crec = (crec / p2024) * 100
@@ -334,44 +378,50 @@ elif tipo_ramo == "Accidentes y Enfermedades":
                 else:
                     pct_crec_v = 0.08
                 bono_crec = crec * pct_crec_v
-                resultado += f"<li>Bono de Crecimiento A&H: <strong>{pct_crec_v*100:.2f}%</strong> ➜ <strong>${bono_crec:,.2f}</strong> (Crecimiento del {pct_crec:.2f}%)</li>"
+                if pct_crec_v > 0:
+                    resultado += f"<li>📈 <strong>Bono de Crecimiento A&H:</strong> {pct_crec_v*100:.2f}% ➜ <strong>${bono_crec:,.2f}</strong> (Crecimiento del {pct_crec:.2f}%)</li>"
+                else:
+                    resultado += f"<li>💔 <strong>Bono de Crecimiento A&H:</strong> $0.00 ❌ No aplica por crecimiento menor al 10% (tuvo {pct_crec:.2f}%).</li>"
 
             total = bono_prod + bono_sini + bono_crec
-            resultado += f"</ul><h4>🧾 Total del Bono A&H:</h4><p><strong>${total:,.2f}</strong></p>"
+            resultado += f"</ul><h4>🧾 <strong>Total del Bono A&H:</strong> ${total:,.2f}</h4>"
 
         except Exception as e:
             resultado = f"<p style='color:red;'>❌ Error: {e}</p>"
 
+        st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
+
+
 elif tipo_ramo == "Otros Daños":
-    st.markdown("### 🧱 Datos para Otros Daños (MM & MAD)")
+    st.markdown("#### Datos para Otros Daños (MM & MAD)")
     prod_otros = st.text_input("Producción 2025 Otros Daños ($)", placeholder="Ej. $300,000")
 
     if st.button("Calcular Bonos Otros Daños"):
         try:
             p = int(prod_otros.replace("$", "").replace(",", ""))
+
             resultado += f"<h3>📋 Resultado para {nombre.upper()}</h3>"
             resultado += "<h4>📊 Datos Ingresados:</h4><ul>"
-            resultado += f"<li>Producción Otros Daños: <strong>${p:,.2f}</strong></li></ul>"
+            resultado += f"<li>Producción 2025 Otros Daños: <strong>${p:,.2f}</strong></li></ul>"
             resultado += "<h4>💵 Resultados de Bono:</h4><ul>"
 
             if p >= 250000:
                 pct_prod = 0.015
                 bono = p * pct_prod
-                resultado += f"<li>Bono de Producción Otros Daños: <strong>1.50%</strong> ➜ <strong>${bono:,.2f}</strong> ✅ Aplica por superar $250,000</li>"
+                resultado += f"<li>🏗️ <strong>Bono de Producción Otros Daños:</strong> {pct_prod*100:.2f}% ➜ <strong>${bono:,.2f}</strong> ✅ Aplica por superar el mínimo de $250,000</li>"
             else:
-                resultado += "<li>Bono de Producción Otros Daños: ❌ No aplica. Mínimo requerido: $250,000</li>"
                 bono = 0
+                resultado += f"<li>💔 <strong>Bono de Producción Otros Daños:</strong> $0.00 ❌ No aplica. Mínimo requerido: $250,000</li>"
 
-            resultado += f"</ul><h4>🧾 Total del Bono Otros Daños:</h4><p><strong>${bono:,.2f}</strong></p>"
+            resultado += f"</ul><h4>🧾 <strong>Total del Bono Otros Daños:</strong> ${bono:,.2f}</h4>"
 
         except Exception as e:
             resultado = f"<p style='color:red;'>❌ Error: {e}</p>"
+
+        st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
 
 # Mostrar resultados y restricciones
 if resultado:
     st.markdown("---")
     st.markdown(resultado, unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
-else:
-    st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
-
