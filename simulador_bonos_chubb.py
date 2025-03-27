@@ -159,79 +159,45 @@ else:
     st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
 
 
-if tipo_ramo == "Vida":
-    st.markdown("### ❤️ Datos para Vida")
-    prod_2024 = st.text_input("Producción 2024 Vida ($)", placeholder="Ej. $200,000")
-    prod_2025 = st.text_input("Producción 2025 Vida ($)", placeholder="Ej. $400,000")
-    siniestralidad = st.text_input("Siniestralidad (%)", placeholder="Ej. 20")
+elif tipo_ramo == "Vida":
+    st.markdown("### 🧬 Datos para Vida Grupo")
+    suma_asegurada = st.text_input("Suma Asegurada 2025 ($)", placeholder="Ej. $1,000,000")
 
     if st.button("Calcular Bonos Vida"):
         try:
-            p2024 = int(prod_2024.replace("$", "").replace(",", "")) if prod_2024 else 0
-            p2025 = int(prod_2025.replace("$", "").replace(",", "")) if prod_2025 else 0
-            sin = float(siniestralidad)
+            sa = int(suma_asegurada.replace("$", "").replace(",", ""))
             resultado += f"<h3>📋 Resultado para {nombre.upper()}</h3>"
             resultado += "<h4>📊 Datos Ingresados:</h4><ul>"
-            resultado += f"<li>Producción 2024: <strong>${p2024:,.2f}</strong></li>"
-            resultado += f"<li>Producción 2025: <strong>${p2025:,.2f}</strong></li>"
-            resultado += f"<li>Siniestralidad: <strong>{sin:.2f}%</strong></li></ul>"
+            resultado += f"<li>Suma Asegurada 2025: <strong>${sa:,.2f}</strong></li></ul>"
             resultado += "<h4>💵 Resultados de Bono:</h4><ul>"
 
-            # Bono Producción Vida
-            if sin > 60:
-                pct_prod = 0
-            elif p2025 <= 300000:
-                pct_prod = 0.01
-            elif p2025 <= 500000:
-                pct_prod = 0.02
-            elif p2025 <= 750000:
-                pct_prod = 0.04
-            elif p2025 <= 1000000:
-                pct_prod = 0.06
-            elif p2025 <= 1500000:
-                pct_prod = 0.07
+            if sa < 250000:
+                bono_vida = 0
+                resultado += f"<li>Bono de Vida: <strong>$0.00</strong> ❌ No aplica por no alcanzar el mínimo de $250,000 en suma asegurada.</li>"
+            elif sa <= 500000:
+                pct_vida = 0.01
+            elif sa <= 1000000:
+                pct_vida = 0.02
+            elif sa <= 2000000:
+                pct_vida = 0.03
+            elif sa <= 3000000:
+                pct_vida = 0.04
+            elif sa <= 5000000:
+                pct_vida = 0.05
             else:
-                pct_prod = 0.08
-            bono_prod = p2025 * pct_prod
-            resultado += f"<li>Bono de Producción Vida: <strong>{pct_prod*100:.2f}%</strong> ➜ <strong>${bono_prod:,.2f}</strong></li>"
+                pct_vida = 0.06
 
-            # Bono Siniestralidad Vida
-            if sin <= 22.99:
-                pct_sini = 0.04
-            elif sin <= 34.99:
-                pct_sini = 0.02
-            else:
-                pct_sini = 0
-            bono_sini = p2025 * pct_sini
-            resultado += f"<li>Bono de Siniestralidad Vida: <strong>{pct_sini*100:.2f}%</strong> ➜ <strong>${bono_sini:,.2f}</strong></li>"
+            if sa >= 250000:
+                bono_vida = sa * pct_vida
+                resultado += f"<li>Bono de Vida: <strong>{pct_vida*100:.2f}%</strong> ➜ <strong>${bono_vida:,.2f}</strong></li>"
 
-            # Bono Crecimiento Vida
-            if p2024 == 0:
-                bono_crec = 0
-                resultado += f"<li>Bono de Crecimiento Vida: ❌ No aplica por no tener producción en 2024.</li>"
-            else:
-                crec = p2025 - p2024
-                pct_crec = (crec / p2024) * 100
-                if pct_crec < 10:
-                    pct_crec_v = 0
-                elif pct_crec <= 20:
-                    pct_crec_v = 0.01
-                elif pct_crec <= 30:
-                    pct_crec_v = 0.02
-                elif pct_crec <= 40:
-                    pct_crec_v = 0.03
-                elif pct_crec <= 50:
-                    pct_crec_v = 0.04
-                else:
-                    pct_crec_v = 0.05
-                bono_crec = crec * pct_crec_v
-                resultado += f"<li>Bono de Crecimiento Vida: <strong>{pct_crec_v*100:.2f}%</strong> ➜ <strong>${bono_crec:,.2f}</strong> (Crecimiento del {pct_crec:.2f}%)</li>"
-
-            total = bono_prod + bono_sini + bono_crec
-            resultado += f"</ul><h4>🧾 Total del Bono Vida:</h4><p><strong>${total:,.2f}</strong></p>"
+            resultado += f"</ul><h4>🧾 Total del Bono Vida:</h4><p><strong>${bono_vida:,.2f}</strong></p>"
 
         except Exception as e:
             resultado = f"<p style='color:red;'>❌ Error: {e}</p>"
+
+        # Mostrar mensaje de restricciones debajo del botón después del cálculo
+        st.markdown("<p style='text-align: center; font-size:14px;'>Aplican restricciones y condiciones conforme al cuaderno oficial de CHUBB Seguros 2025.</p>", unsafe_allow_html=True)
 
 
 elif tipo_ramo == "Hogar":
