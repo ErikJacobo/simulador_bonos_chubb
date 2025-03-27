@@ -2,39 +2,40 @@ import streamlit as st
 
 st.set_page_config(page_title="Simulador de Bonos CHUBB 2025", layout="centered")
 
-# Aplicar estilo CSS personalizado para ajustar la posición del logo
+# Logo e imagen
+from PIL import Image
+logo = Image.open("link logo.jpg")
+
+# Estilo para ajustar altura del logo con el título
 st.markdown("""
     <style>
-        .logo-container {
+        .titulo-logo {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
         }
-        .logo-container img {
-            margin-top: -10px; /* Ajusta este valor según lo necesites */
+        .titulo-logo h1, .titulo-logo h2 {
+            margin: 0;
+            padding: 0;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# Contenedor con el logo alineado a la derecha
-st.markdown("""
-    <div class="logo-container">
-        <div>
-            <h1>Simulador de Bonos</h1>
-            <h2>CHUBB 2025</h2>
-        </div>
-        <div>
-            <img src="link logo.jpg" width="100">
-        </div>
-    </div>
-""", unsafe_allow_html=True)
+# Mostrar encabezado con logo al lado
+st.markdown('<div class="titulo-logo">', unsafe_allow_html=True)
+col1, col2 = st.columns([5, 1])
+with col1:
+    st.markdown("## Simulador de Bonos")
+    st.markdown("### CHUBB 2025")
+with col2:
+    st.image(logo, width=100)
+st.markdown('</div>', unsafe_allow_html=True)
 
 # Campo para nombre antes del ramo
 nombre = st.text_input("Nombre del Agente")
 tipo_ramo = st.selectbox("Selecciona el ramo a simular", ["Autos", "Daños PYME", "Vida", "Hogar", "Accidentes y Enfermedades", "Otros Daños"])
 
 resultado = ""
-
 
 
 if tipo_ramo == "Autos":
